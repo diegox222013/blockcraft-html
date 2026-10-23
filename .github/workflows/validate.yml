@@ -19,4 +19,4 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Check JavaScript syntax
-        run: npm run check
+        run: npm run check && npm test
