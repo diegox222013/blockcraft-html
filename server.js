@@ -29,7 +29,7 @@ function playerArray(room){return Array.from(room.players.values()).map(p=>({id:
 function roomPlayers(room){const list=playerArray(room);for(const member of room.members)send(member,{type:"players",players:list})}
 function broadcast(room,payload,except){for(const member of room.members)if(member!==except)send(member,payload)}
 function actualBlock(room,x,y){const key=x+","+y;return Object.prototype.hasOwnProperty.call(room.blocks,key)?room.blocks[key]:room.world[y][x]}
-function spawnAt(seed){return{x:8*TILE,y:surfaceY(8,seed)*TILE-28}}
+function spawnAt(seed,slot=0){const sx=8+Math.max(0,Math.min(7,slot))*3;return{x:sx*TILE,y:surfaceY(sx,seed)*TILE-28}}
 function removeFromRoom(ws,notify=true){
  const room=ws.room,player=ws.player;if(!room||!player)return;
  room.members.delete(ws);room.players.delete(player.id);ws.room=null;ws.player=null;
@@ -48,7 +48,7 @@ function joinRoom(ws,msg){
   if(!room)room=createRoom("pvp");
  }
  if(room.players.size>=MAX_PLAYERS){send(ws,{type:"error",message:"La sala está llena. Prueba otra vez."});return}
- const id=crypto.randomUUID(),spawn=spawnAt(room.seed),colors=["#83bff0","#e89cff","#ffc877","#89e9d0","#ff9b91","#d5eb75","#9ba8ff","#f0e7c0"];
+ const id=crypto.randomUUID(),spawn=spawnAt(room.seed,room.players.size),colors=["#83bff0","#e89cff","#ffc877","#89e9d0","#ff9b91","#d5eb75","#9ba8ff","#f0e7c0"];
  const player={id:id,name:safeName(msg.name),x:spawn.x,y:spawn.y,hp:100,color:colors[room.players.size%colors.length],inventory:[0,8,0,0,0,0],lastMoveAt:0,lastBlockAt:0,lastAttackAt:0};
  ws.room=room;ws.player=player;room.members.add(ws);room.players.set(id,player);
  send(ws,{type:"joined",playerId:id,name:player.name,roomCode:room.code,mode:room.mode,seed:room.seed,players:playerArray(room),blocks:room.blocks,inventory:player.inventory,health:player.hp});
