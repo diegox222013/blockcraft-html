@@ -49,6 +49,7 @@ function openSocket(){
  if(socket&&socket.readyState===WebSocket.OPEN)return Promise.resolve(socket);
  if(socketPromise)return socketPromise;
  if(location.protocol==="file:"||!location.host)return Promise.reject(new Error("Abre el juego desde el servidor Node.js para usar el modo online."));
+ if(location.hostname.endsWith("github.io"))return Promise.reject(new Error("GitHub Pages permite el modo individual; para jugar online despliega esta rama como Web Service Node."));
  const protocol=location.protocol==="https:"?"wss:":"ws:";
  socketPromise=new Promise((resolve,reject)=>{
   let settled=false;const ws=new WebSocket(protocol+"//"+location.host);socket=ws;
@@ -196,6 +197,6 @@ $("chat-form").addEventListener("submit",e=>{e.preventDefault();const input=$("c
 ui.code.addEventListener("input",()=>{ui.code.value=ui.code.value.toUpperCase().replace(/[^A-Z0-9]/g,"")});
 window.addEventListener("resize",resize);
 generateWorld(seed);spawnPlayer();updateHotbar();resize();setStatus("Esperando servidor",false);
-if(location.protocol!=="file:"&&location.host){fetch("/healthz",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(()=>setStatus("Servidor disponible",true)).catch(()=>setStatus("Sin servidor online",false))}
+if(location.protocol!=="file:"&&location.host){fetch("./healthz",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(()=>setStatus("Servidor disponible",true)).catch(()=>setStatus("Sin servidor online",false))}
 requestAnimationFrame(frame);
 })();
